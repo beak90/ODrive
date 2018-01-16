@@ -6,10 +6,12 @@ PacketSource/PacketSink interfaces for serial ports.
 import odrive
 import serial
 import time
+import atexit
 
 class SerialStreamTransport(odrive.protocol.StreamSource, odrive.protocol.StreamSink):
     def __init__(self, port, baud):
         self._dev = serial.Serial(port, baud, timeout=1)
+        atexit.register(self.close_port)
 
     def process_bytes(self, bytes):
         self._dev.write(bytes)
@@ -32,5 +34,9 @@ class SerialStreamTransport(odrive.protocol.StreamSource, odrive.protocol.Stream
         if len(result) < n_bytes:
             raise odrive.protocol.TimeoutException("expected {} bytes but got only {}", n_bytes, len(result))
         return result
+
+    def close_port(self):
+        print("closing port")
+        self._dev.close()
 
 # TODO: provide SerialPacketTransport
