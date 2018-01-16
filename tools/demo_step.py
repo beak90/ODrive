@@ -22,12 +22,9 @@ my_drive = odrive.core.find_any(consider_usb=True, consider_serial=False, printe
 # To read a value, simply read the property
 print("Bus voltage is " + str(my_drive.vbus_voltage) + "V")
 
-# Or to change a value, just assign to the property
-my_drive.motor0.pos_setpoint = 3.14
-print("Position setpoint is " + str(my_drive.motor0.pos_setpoint))
-
 # And this is how function calls are done:
 my_drive.motor0.set_pos_setpoint(0.0, 0.0, 0.0)
+time.sleep(1.0)
 
 # A little sine wave to test
 t0 = time.monotonic()
@@ -35,30 +32,20 @@ current_time = t0
 last_time = t0
 mysum = 0
 
-# amplitude in encoder counts
-a = 1000.0
+my_drive.motor0.set_pos_setpoint(2000.0, 0.0, 0.0)
 
-# period in seconds
-p = 3.0
-
-time_steps = 1000
+time_steps = 400
 
 for x in range(1, time_steps):
     current_time = time.monotonic()
     mysum += (current_time - last_time)
     last_time = current_time
-
-    setpoint = a * math.sin((current_time - t0)*(2*math.pi)/p)
-    #print("delta t " + str(current_time - last_time))
-    vel = a * ((2*math.pi)/p) * math.cos((current_time - t0)*(2*math.pi)/p)
-
-    my_drive.motor0.pos_setpoint = setpoint
+    
+    position = my_drive.motor0.encoder.pll_pos
+    #print("position: " + str(my_drive.motor0.encoder.pll_pos))
     #time.sleep(0.01)
 
 print(str(mysum/time_steps))
-
-
-
 # Some more things you can try:
 
 # Write to a read-only property:
